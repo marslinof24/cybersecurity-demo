@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 資安風險情境分析平台</title>
+    <title>企業資安威脅建模與風險分析系統</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -58,7 +58,7 @@
         .view-hidden { display: none !important; }
         .fade-in { animation: fadeIn 0.5s ease-in-out forwards; }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -69,7 +69,7 @@
             border: 1px solid rgba(255,255,255,0.05);
             transition: all 0.3s ease;
         }
-        .glass-card:hover { transform: translateY(-5px); }
+        .glass-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
 
         /* 雷達掃描動畫 */
         .radar-container {
@@ -108,350 +108,428 @@
         .node-owner::before { background: linear-gradient(45deg, #00ff66, transparent); }
     </style>
 </head>
-<body class="min-h-screen w-full flex flex-col items-center justify-center p-4 selection:bg-cyber-neonBlue selection:text-black overflow-y-auto">
+<body class="min-h-screen w-full flex flex-col items-center justify-center p-4 selection:bg-cyber-neonBlue selection:text-black overflow-x-hidden">
+
+    <!-- 視圖 0：首頁介紹 -->
+    <div id="view-home" class="w-full max-w-4xl flex flex-col items-center justify-center text-center py-10 fade-in">
+        <div class="mb-6 relative">
+            <div class="absolute inset-0 bg-cyber-neonBlue blur-3xl opacity-20 rounded-full"></div>
+            <i class="fa-solid fa-shield-halved text-7xl text-cyber-neonBlue relative z-10 drop-shadow-[0_0_15px_rgba(0,240,255,0.5)]"></i>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 mb-4 tracking-wider">
+            企業資安威脅建模與
+            <br class="md:hidden" />
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyber-neonBlue to-cyber-neonGreen">風險分析系統</span>
+        </h1>
+        <p class="text-xl text-gray-400 mb-10 font-light tracking-wide">
+            基於 ISO 27005 標準的視覺化診斷平台
+        </p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 w-full max-w-3xl text-left">
+            <div class="glass-card p-5 rounded-xl border border-cyber-border/50">
+                <i class="fa-solid fa-crosshairs text-cyber-neonBlue text-2xl mb-3"></i>
+                <h3 class="text-white font-bold mb-2">情境式威脅建模</h3>
+                <p class="text-sm text-gray-400">透過簡單的選項設定，系統自動模擬潛在攻擊者路徑與動機。</p>
+            </div>
+            <div class="glass-card p-5 rounded-xl border border-cyber-border/50">
+                <i class="fa-solid fa-diagram-project text-cyber-neonPurple text-2xl mb-3"></i>
+                <h3 class="text-white font-bold mb-2">關聯鏈路分析</h3>
+                <p class="text-sm text-gray-400">視覺化呈現「來源、弱點、風險、擁有者」之間的邏輯推演關聯。</p>
+            </div>
+            <div class="glass-card p-5 rounded-xl border border-cyber-border/50">
+                <i class="fa-solid fa-chart-pie text-cyber-neonGreen text-2xl mb-3"></i>
+                <h3 class="text-white font-bold mb-2">純前端模擬技術</h3>
+                <p class="text-sm text-gray-400">無須後端 API 支援，即時動態運算呈現高質感的分析報告儀表板。</p>
+            </div>
+        </div>
+
+        <button onclick="switchView('view-survey')" class="bg-cyber-neonBlue/10 border-2 border-cyber-neonBlue text-cyber-neonBlue hover:bg-cyber-neonBlue hover:text-black hover:shadow-neon-blue font-bold text-lg py-4 px-10 rounded-full transition-all duration-300 flex items-center justify-center gap-3 group">
+            <span>開始諮詢</span>
+            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+        </button>
+    </div>
 
     <!-- 視圖 1：問卷設定區 -->
-    <div id="view-survey" class="w-full max-w-3xl glass-card rounded-2xl p-6 md:p-10 fade-in">
+    <div id="view-survey" class="view-hidden w-full max-w-2xl glass-card rounded-2xl p-6 md:p-10">
         <header class="mb-8 text-center border-b border-cyber-border pb-6">
-            <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyber-neonBlue to-cyber-neonGreen flex items-center justify-center gap-3 mb-2">
-                <i class="fa-solid fa-shield-virus text-cyber-neonBlue"></i>
-                AI 企業資安風險健診
-            </h1>
-            <p class="text-gray-400 text-sm">基於 ISO 27005 框架，請描述您的公司情境以進行動態分析</p>
+            <h2 class="text-2xl font-bold text-white flex items-center justify-center gap-3 mb-2">
+                <i class="fa-solid fa-clipboard-list text-cyber-neonBlue"></i>
+                情境參數設定
+            </h2>
+            <p class="text-gray-400 text-sm">請選擇符合貴公司的現況，以利系統生成風險模型</p>
         </header>
 
         <form id="survey-form" class="space-y-6">
-            <!-- API Key -->
-            <div class="bg-gray-900/50 p-4 rounded-xl border border-cyber-neonBlue/30">
-                <label class="block text-cyber-neonBlue text-sm font-bold mb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-key"></i> Gemini API Key (選填)
-                </label>
-                <input type="password" id="input-apikey" placeholder="請輸入 API Key (若於此平台測試可留空)" 
-                       class="cyber-input w-full p-3 rounded-lg text-sm">
-                <p class="text-xs text-gray-500 mt-2">提示：若需自行部署，請務必填寫以啟動 AI 模型分析。</p>
-            </div>
-
-            <!-- Q1: 資產 -->
+            <!-- 欄位 1: 產業別 -->
             <div>
                 <label class="block text-gray-300 text-sm font-bold mb-2">
-                    1. 您想保護的核心資產、系統或業務是什麼？
+                    <i class="fa-solid fa-building mr-1"></i> 1. 貴公司所屬產業別
                 </label>
-                <textarea id="input-asset" rows="2" required placeholder="例如：客戶資料庫、產線機台、線上支付系統..." 
-                          class="cyber-input w-full p-3 rounded-lg text-sm resize-none"></textarea>
+                <div class="relative">
+                    <select id="input-industry" required class="cyber-input w-full p-3 rounded-lg text-sm appearance-none cursor-pointer">
+                        <option value="" disabled selected>請選擇產業...</option>
+                        <option value="科技製造業">科技製造業</option>
+                        <option value="金融保險業">金融保險業</option>
+                        <option value="醫療保健業">醫療保健業</option>
+                        <option value="電子商務/零售業">電子商務/零售業</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-cyber-neonBlue">
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                </div>
             </div>
 
-            <!-- Q2: 威脅 -->
+            <!-- 欄位 2: 核心資產 -->
             <div>
                 <label class="block text-gray-300 text-sm font-bold mb-2">
-                    2. 您最擔心的潛在威脅來源是什麼？
+                    <i class="fa-solid fa-server mr-1"></i> 2. 主要想保護的核心資產
                 </label>
-                <textarea id="input-threat" rows="2" required placeholder="例如：外部駭客勒索、內部員工疏失、地震斷電..." 
-                          class="cyber-input w-full p-3 rounded-lg text-sm resize-none"></textarea>
+                <div class="relative">
+                    <select id="input-asset" required class="cyber-input w-full p-3 rounded-lg text-sm appearance-none cursor-pointer">
+                        <option value="" disabled selected>請選擇核心資產...</option>
+                        <option value="客戶個資與交易資料庫">客戶個資與交易資料庫</option>
+                        <option value="核心產線與工控系統 (OT)">核心產線與工控系統 (OT)</option>
+                        <option value="內部研發專利與原始碼">內部研發專利與原始碼</option>
+                        <option value="對外營運之 Web 服務系統">對外營運之 Web 服務系統</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-cyber-neonBlue">
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                </div>
             </div>
 
-            <!-- Q3: 弱點 -->
+            <!-- 欄位 3: 最擔心的威脅 -->
             <div>
                 <label class="block text-gray-300 text-sm font-bold mb-2">
-                    3. 貴公司目前在該資產上，覺得最缺乏的防護或弱點是什麼？
+                    <i class="fa-solid fa-biohazard mr-1"></i> 3. 最擔心的資安威脅來源
                 </label>
-                <textarea id="input-vuln" rows="2" required placeholder="例如：沒有雙重驗證、沒有異地備份、系統久未更新..." 
-                          class="cyber-input w-full p-3 rounded-lg text-sm resize-none"></textarea>
+                <div class="relative">
+                    <select id="input-threat" required class="cyber-input w-full p-3 rounded-lg text-sm appearance-none cursor-pointer">
+                        <option value="" disabled selected>請選擇潛在威脅...</option>
+                        <option value="勒索軟體 (Ransomware)">外部攻擊者散佈勒索軟體 (Ransomware)</option>
+                        <option value="內部疏失或惡意竊密">內部員工疏失或惡意竊密</option>
+                        <option value="供應鏈漏洞利用">第三方供應商/供應鏈漏洞利用</option>
+                        <option value="DDoS 阻斷服務攻擊">針對性 DDoS 阻斷服務攻擊</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-cyber-neonBlue">
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                </div>
             </div>
 
-            <!-- 錯誤提示區塊 -->
-            <div id="error-msg" class="hidden bg-red-500/20 border border-red-500/50 text-red-400 p-3 rounded-lg text-sm flex items-center gap-2">
-                <i class="fa-solid fa-circle-exclamation"></i> <span id="error-text">發生錯誤</span>
+            <div class="pt-4 flex gap-4">
+                <button type="button" onclick="switchView('view-home')" class="w-1/3 bg-transparent border border-gray-600 text-gray-300 hover:bg-gray-800 font-bold py-3 px-4 rounded-xl transition-all duration-300">
+                    返回
+                </button>
+                <button type="submit" class="w-2/3 bg-cyber-neonBlue/20 border-2 border-cyber-neonBlue text-cyber-neonBlue hover:bg-cyber-neonBlue hover:text-black hover:shadow-neon-blue font-bold py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group">
+                    <span>送出分析</span>
+                    <i class="fa-solid fa-microchip group-hover:animate-pulse"></i>
+                </button>
             </div>
-
-            <!-- 提交按鈕 -->
-            <button type="submit" class="w-full bg-transparent border-2 border-cyber-neonBlue text-cyber-neonBlue hover:bg-cyber-neonBlue hover:text-black font-bold py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-3 group">
-                <span>開始 AI 情境分析</span>
-                <i class="fa-solid fa-robot group-hover:animate-bounce"></i>
-            </button>
         </form>
     </div>
 
-    <!-- 視圖 2：AI 分析載入中 -->
-    <div id="view-loading" class="view-hidden w-full flex-col items-center justify-center py-20 fade-in">
+    <!-- 視圖 2：分析載入中 -->
+    <div id="view-loading" class="view-hidden w-full flex-col items-center justify-center py-20">
         <div class="radar-container mb-8">
             <div class="radar-scanner"></div>
         </div>
-        <h2 class="text-2xl font-bold text-cyber-neonBlue tracking-widest animate-pulse mb-2">AI 分析中...</h2>
-        <p class="text-gray-400 font-mono text-sm" id="loading-text">正在比對 ISO 27005 資安框架資料庫</p>
+        <h2 class="text-2xl font-bold text-cyber-neonBlue tracking-widest animate-pulse mb-2">系統診斷中...</h2>
+        <p class="text-gray-400 font-mono text-sm h-6" id="loading-text">初始化分析模組</p>
+        
+        <!-- 模擬進度條 -->
+        <div class="w-64 h-1 bg-gray-800 mt-6 rounded-full overflow-hidden">
+            <div id="progress-bar" class="h-full bg-cyber-neonBlue w-0 transition-all duration-300"></div>
+        </div>
     </div>
 
     <!-- 視圖 3：視覺化圖表結果 -->
-    <div id="view-dashboard" class="view-hidden w-full max-w-6xl fade-in">
+    <div id="view-dashboard" class="view-hidden w-full max-w-6xl">
         <header class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end border-b border-cyber-border pb-6 gap-4">
             <div>
-                <div class="inline-flex px-3 py-1 rounded-full border border-cyber-neonBlue/30 bg-cyber-neonBlue/10 text-cyber-neonBlue text-xs font-bold tracking-wide mb-3 items-center">
-                    <i class="fa-solid fa-check-double mr-2"></i>AI GENERATED REPORT
+                <div class="inline-flex px-3 py-1 rounded-full border border-cyber-neonGreen/30 bg-cyber-neonGreen/10 text-cyber-neonGreen text-xs font-bold tracking-wide mb-3 items-center">
+                    <i class="fa-solid fa-check-circle mr-2"></i>ISO 27005 COMPLIANT REPORT
                 </div>
                 <h2 class="text-3xl md:text-4xl font-bold text-white leading-tight">資安風險情境診斷報告</h2>
             </div>
-            <button onclick="restartConsultation()" class="bg-gray-800 hover:bg-gray-700 text-white px-5 py-2 rounded-lg text-sm border border-gray-600 transition flex items-center gap-2">
-                <i class="fa-solid fa-rotate-left"></i> 重新諮詢
+            <button onclick="switchView('view-home')" class="bg-gray-800 hover:bg-gray-700 text-white px-5 py-2 rounded-lg text-sm border border-gray-600 transition flex items-center gap-2">
+                <i class="fa-solid fa-rotate-left"></i> 重新開始
             </button>
         </header>
 
         <div class="bg-cyber-panel/50 border-l-4 border-cyber-neonBlue p-5 rounded-r-lg mb-8 glass-card">
-            <h3 class="text-sm text-cyber-neonBlue font-bold mb-2 uppercase"><i class="fa-solid fa-file-lines mr-1"></i> 綜整情境描述</h3>
-            <p id="display-desc" class="text-gray-300 leading-relaxed text-lg"></p>
+            <h3 class="text-sm text-cyber-neonBlue font-bold mb-2 uppercase"><i class="fa-solid fa-file-lines mr-1"></i> 情境綜整描述</h3>
+            <p id="display-desc" class="text-gray-300 leading-relaxed text-lg font-medium"></p>
         </div>
 
         <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
             <!-- Source -->
-            <div class="glass-card rounded-xl p-5 border-t-4 border-t-cyber-neonRed">
+            <div class="glass-card rounded-xl p-5 border-t-4 border-t-cyber-neonRed flex flex-col h-full">
                 <div class="flex justify-between mb-4">
-                    <h3 class="text-gray-400 font-bold uppercase text-sm">威脅來源</h3>
+                    <h3 class="text-gray-400 font-bold uppercase text-sm">威脅來源 (Source)</h3>
                     <i class="fa-solid fa-user-ninja text-cyber-neonRed text-xl"></i>
                 </div>
-                <p id="card-source" class="text-white font-medium"></p>
+                <p id="card-source" class="text-white font-medium flex-grow"></p>
             </div>
             <!-- Vuln -->
-            <div class="glass-card rounded-xl p-5 border-t-4 border-t-cyber-neonPurple">
+            <div class="glass-card rounded-xl p-5 border-t-4 border-t-cyber-neonPurple flex flex-col h-full">
                 <div class="flex justify-between mb-4">
-                    <h3 class="text-gray-400 font-bold uppercase text-sm">脆弱點</h3>
+                    <h3 class="text-gray-400 font-bold uppercase text-sm">脆弱點 (Vulnerability)</h3>
                     <i class="fa-solid fa-door-open text-cyber-neonPurple text-xl"></i>
                 </div>
-                <p id="card-vuln" class="text-white font-medium"></p>
+                <p id="card-vuln" class="text-white font-medium flex-grow"></p>
             </div>
             <!-- Risk -->
-            <div class="glass-card rounded-xl p-5 border-t-4 border-t-cyber-neonBlue">
+            <div class="glass-card rounded-xl p-5 border-t-4 border-t-cyber-neonBlue flex flex-col h-full">
                 <div class="flex justify-between mb-4">
-                    <h3 class="text-gray-400 font-bold uppercase text-sm">風險影響</h3>
+                    <h3 class="text-gray-400 font-bold uppercase text-sm">導致風險 (Risk)</h3>
                     <i class="fa-solid fa-bolt text-cyber-neonBlue text-xl"></i>
                 </div>
-                <p id="card-risk" class="text-white font-medium"></p>
+                <p id="card-risk" class="text-white font-medium flex-grow"></p>
             </div>
             <!-- Owner -->
-            <div class="glass-card rounded-xl p-5 border-t-4 border-t-cyber-neonGreen">
+            <div class="glass-card rounded-xl p-5 border-t-4 border-t-cyber-neonGreen flex flex-col h-full">
                 <div class="flex justify-between mb-4">
-                    <h3 class="text-gray-400 font-bold uppercase text-sm">資產擁有者</h3>
+                    <h3 class="text-gray-400 font-bold uppercase text-sm">資產擁有者 (Owner)</h3>
                     <i class="fa-solid fa-user-shield text-cyber-neonGreen text-xl"></i>
                 </div>
-                <p id="card-owner" class="text-white font-medium"></p>
+                <p id="card-owner" class="text-white font-medium flex-grow"></p>
             </div>
         </section>
 
         <section class="relative glass-card rounded-2xl p-6 md:p-10 border border-cyber-border/50 mb-10">
             <h3 class="text-xl font-bold text-gray-300 mb-8 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-network-wired text-cyber-neonBlue"></i> 風險鏈路關聯圖 (Risk Chain)
+                <i class="fa-solid fa-network-wired text-cyber-neonBlue"></i> 動態關聯圖 (Relationship Graph)
             </h3>
             
             <div class="flex flex-col lg:flex-row items-center justify-between gap-4 lg:gap-2 relative w-full">
                 <!-- Node: Source -->
-                <div class="graph-node node-source w-full lg:w-1/4 bg-gray-900 border border-cyber-neonRed/30 rounded-xl p-4 text-center">
-                    <div class="text-cyber-neonRed mb-2"><i class="fa-solid fa-biohazard text-2xl"></i></div>
-                    <h4 class="text-sm text-gray-400 font-bold">1. 威脅來源</h4>
-                    <p id="graph-source" class="text-white text-sm mt-1 font-medium"></p>
+                <div class="graph-node node-source w-full lg:w-1/4 bg-gray-900 border border-cyber-neonRed/30 rounded-xl p-4 text-center min-h-[120px] flex flex-col justify-center">
+                    <div class="text-cyber-neonRed mb-1"><i class="fa-solid fa-biohazard text-xl"></i></div>
+                    <h4 class="text-xs text-gray-500 font-bold mb-1">威脅來源</h4>
+                    <p id="graph-source" class="text-white text-sm font-medium break-words"></p>
                 </div>
 
                 <!-- Connector -->
-                <div class="hidden lg:flex w-16 items-center justify-center text-cyber-neonRed relative">
+                <div class="hidden lg:flex w-16 items-center justify-center text-cyber-neonRed relative shrink-0">
                     <svg width="100%" height="20" viewBox="0 0 100 20" preserveAspectRatio="none">
                         <path class="flow-line" d="M0,10 L90,10" stroke="currentColor" stroke-width="2" fill="none"/>
                         <polygon points="90,5 100,10 90,15" fill="currentColor"/>
                     </svg>
                     <span class="absolute -top-5 text-[11px] text-gray-400 font-mono">利用</span>
                 </div>
-                <div class="lg:hidden h-8 flex justify-center text-cyber-neonRed"><i class="fa-solid fa-arrow-down animate-bounce"></i></div>
+                <div class="lg:hidden h-8 flex items-center justify-center text-cyber-neonRed text-sm gap-2">
+                    <span class="text-[11px] text-gray-400 font-mono">利用</span>
+                    <i class="fa-solid fa-arrow-down animate-bounce"></i>
+                </div>
 
                 <!-- Node: Vulnerability -->
-                <div class="graph-node node-vuln w-full lg:w-1/4 bg-gray-900 border border-cyber-neonPurple/30 rounded-xl p-4 text-center">
-                    <div class="text-cyber-neonPurple mb-2"><i class="fa-solid fa-door-open text-2xl"></i></div>
-                    <h4 class="text-sm text-gray-400 font-bold">2. 脆弱點</h4>
-                    <p id="graph-vuln" class="text-white text-sm mt-1 font-medium"></p>
+                <div class="graph-node node-vuln w-full lg:w-1/4 bg-gray-900 border border-cyber-neonPurple/30 rounded-xl p-4 text-center min-h-[120px] flex flex-col justify-center">
+                    <div class="text-cyber-neonPurple mb-1"><i class="fa-solid fa-door-open text-xl"></i></div>
+                    <h4 class="text-xs text-gray-500 font-bold mb-1">脆弱點</h4>
+                    <p id="graph-vuln" class="text-white text-sm font-medium break-words"></p>
                 </div>
 
                 <!-- Connector -->
-                <div class="hidden lg:flex w-16 items-center justify-center text-cyber-neonPurple relative">
+                <div class="hidden lg:flex w-16 items-center justify-center text-cyber-neonPurple relative shrink-0">
                     <svg width="100%" height="20" viewBox="0 0 100 20" preserveAspectRatio="none">
                         <path class="flow-line" d="M0,10 L90,10" stroke="currentColor" stroke-width="2" fill="none"/>
                         <polygon points="90,5 100,10 90,15" fill="currentColor"/>
                     </svg>
                     <span class="absolute -top-5 text-[11px] text-gray-400 font-mono">導致</span>
                 </div>
-                <div class="lg:hidden h-8 flex justify-center text-cyber-neonPurple"><i class="fa-solid fa-arrow-down animate-bounce"></i></div>
+                <div class="lg:hidden h-8 flex items-center justify-center text-cyber-neonPurple text-sm gap-2">
+                    <span class="text-[11px] text-gray-400 font-mono">導致</span>
+                    <i class="fa-solid fa-arrow-down animate-bounce"></i>
+                </div>
 
                 <!-- Node: Risk -->
-                <div class="graph-node node-risk w-full lg:w-1/4 bg-gray-900 border border-cyber-neonBlue/30 rounded-xl p-4 text-center">
-                    <div class="text-cyber-neonBlue mb-2"><i class="fa-solid fa-triangle-exclamation text-2xl"></i></div>
-                    <h4 class="text-sm text-gray-400 font-bold">3. 風險</h4>
-                    <p id="graph-risk" class="text-white text-sm mt-1 font-medium"></p>
+                <div class="graph-node node-risk w-full lg:w-1/4 bg-gray-900 border border-cyber-neonBlue/30 rounded-xl p-4 text-center min-h-[120px] flex flex-col justify-center">
+                    <div class="text-cyber-neonBlue mb-1"><i class="fa-solid fa-triangle-exclamation text-xl"></i></div>
+                    <h4 class="text-xs text-gray-500 font-bold mb-1">業務風險</h4>
+                    <p id="graph-risk" class="text-white text-sm font-medium break-words"></p>
                 </div>
 
                 <!-- Connector -->
-                <div class="hidden lg:flex w-16 items-center justify-center text-cyber-neonBlue relative">
+                <div class="hidden lg:flex w-16 items-center justify-center text-cyber-neonBlue relative shrink-0">
                     <svg width="100%" height="20" viewBox="0 0 100 20" preserveAspectRatio="none">
                         <path class="flow-line" d="M0,10 L90,10" stroke="currentColor" stroke-width="2" fill="none"/>
                         <polygon points="90,5 100,10 90,15" fill="currentColor"/>
                     </svg>
                     <span class="absolute -top-5 text-[11px] text-gray-400 font-mono">影響</span>
                 </div>
-                <div class="lg:hidden h-8 flex justify-center text-cyber-neonBlue"><i class="fa-solid fa-arrow-down animate-bounce"></i></div>
+                <div class="lg:hidden h-8 flex items-center justify-center text-cyber-neonBlue text-sm gap-2">
+                    <span class="text-[11px] text-gray-400 font-mono">影響</span>
+                    <i class="fa-solid fa-arrow-down animate-bounce"></i>
+                </div>
 
                 <!-- Node: Owner -->
-                <div class="graph-node node-owner w-full lg:w-1/4 bg-gray-900 border border-cyber-neonGreen/30 rounded-xl p-4 text-center">
-                    <div class="text-cyber-neonGreen mb-2"><i class="fa-solid fa-user-shield text-2xl"></i></div>
-                    <h4 class="text-sm text-gray-400 font-bold">4. 擁有者</h4>
-                    <p id="graph-owner" class="text-white text-sm mt-1 font-medium"></p>
+                <div class="graph-node node-owner w-full lg:w-1/4 bg-gray-900 border border-cyber-neonGreen/30 rounded-xl p-4 text-center min-h-[120px] flex flex-col justify-center">
+                    <div class="text-cyber-neonGreen mb-1"><i class="fa-solid fa-user-shield text-xl"></i></div>
+                    <h4 class="text-xs text-gray-500 font-bold mb-1">擁有者</h4>
+                    <p id="graph-owner" class="text-white text-sm font-medium break-words"></p>
                 </div>
             </div>
         </section>
     </div>
 
     <script>
-        // DOM 元素參考
-        const viewSurvey = document.getElementById('view-survey');
-        const viewLoading = document.getElementById('view-loading');
-        const viewDashboard = document.getElementById('view-dashboard');
-        const form = document.getElementById('survey-form');
-        const errorMsg = document.getElementById('error-msg');
-        const errorText = document.getElementById('error-text');
-
-        // 隱藏/顯示視圖控制
+        // 視圖切換邏輯
         function switchView(viewId) {
-            [viewSurvey, viewLoading, viewDashboard].forEach(el => {
-                el.classList.add('view-hidden');
-                el.classList.remove('fade-in');
+            const views = ['view-home', 'view-survey', 'view-loading', 'view-dashboard'];
+            views.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.add('view-hidden');
+                    el.classList.remove('fade-in');
+                }
             });
             const target = document.getElementById(viewId);
-            target.classList.remove('view-hidden');
-            // 觸發 reflow 讓動畫重新執行
-            void target.offsetWidth;
-            target.classList.add('fade-in');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (target) {
+                target.classList.remove('view-hidden');
+                // 觸發 reflow
+                void target.offsetWidth;
+                target.classList.add('fade-in');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
 
-        // 重新諮詢
-        function restartConsultation() {
-            switchView('view-survey');
+        // 純前端模擬 AI 決策邏輯
+        function simulateAIAnalysis(industry, asset, threat) {
+            let owner = `${industry} 資訊長 (CIO) / 業務負責主管`;
+            let source = "";
+            let vuln = "";
+            let risk = "";
+            let scenarioDescription = "";
+
+            // 根據威脅來源(Threat) 組合基本邏輯
+            switch(threat) {
+                case "勒索軟體 (Ransomware)":
+                    source = "外部進階持續性威脅 (APT) 駭客組織或網路犯罪集團";
+                    vuln = "邊界防護設備未及時更新修補程式，且缺乏有效的異地離線備份機制";
+                    risk = `導致【${asset}】遭加密癱瘓，造成營運中斷與潛在的鉅額贖金損失`;
+                    break;
+                case "內部疏失或惡意竊密":
+                    source = "具備高權限的內部員工或即將離職的人員";
+                    vuln = "特權帳號存取控制(PAM)不嚴密，且缺乏機敏資料外洩防護(DLP)監控";
+                    risk = `造成【${asset}】機密資料外流，導致商譽嚴重受損與面臨法律求償`;
+                    break;
+                case "供應鏈漏洞利用":
+                    source = "防護力較弱的第三方軟體供應商或 IT 委外維護廠商";
+                    vuln = "未針對第三方套件進行嚴格的弱點掃描(SCA)，且缺乏供應商存取稽核";
+                    risk = `駭客透過供應商跳板入侵【${asset}】，導致核心系統遭植入惡意後門`;
+                    break;
+                case "DDoS 阻斷服務攻擊":
+                    source = "國際駭客主義份子或競爭對手發起的殭屍網路";
+                    vuln = "未建置流量清洗中心(Scrubbing Center)或應用層防火牆(WAF)設定不當";
+                    risk = `造成【${asset}】無法對外提供服務，引發客訴潮與嚴重的營業額損失`;
+                    break;
+                default:
+                    source = "未知的外部威脅行為者";
+                    vuln = "系統安全架構設計存在未知的安全缺陷";
+                    risk = `導致【${asset}】的機密性、完整性或可用性受到破壞`;
+            }
+
+            // 針對產業微調情境敘述
+            if (industry === "醫療保健業") {
+                risk = risk.replace("商譽嚴重受損", "病患隱私外洩與違反 HIPAA/個資法");
+                owner = "院長室暨資訊室主任";
+            } else if (industry === "金融保險業") {
+                risk = risk.replace("營業額損失", "違反金管會法規並面臨巨額裁罰");
+                owner = "金控資安長 (CISO)";
+            }
+
+            // 組合完整的情境描述
+            scenarioDescription = `在【${industry}】的營運情境下，【${source}】可能針對【${asset}】發起攻擊。由於系統目前存在「${vuln}」的狀況，攻擊者一旦利用此弱點成功入侵，將會${risk}。此風險應由【${owner}】主導並採取應對處置措施。`;
+
+            // 回傳模擬的 JSON 結構 (包裝成 Promise 模擬非同步請求)
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve({
+                        scenarioDescription: scenarioDescription,
+                        owner: owner,
+                        source: source,
+                        vulnerability: vuln,
+                        risk: risk
+                    });
+                }, 3000); // 模擬 3 秒的等待時間
+            });
         }
 
-        // 顯示錯誤訊息
-        function showError(msg) {
-            errorText.textContent = msg;
-            errorMsg.classList.remove('hidden');
-            switchView('view-survey');
-        }
-
-        // 處理表單送出與 AI API 串接
-        form.addEventListener('submit', async (e) => {
+        document.getElementById('survey-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            errorMsg.classList.add('hidden'); // 隱藏之前的錯誤
 
-            // 取得輸入值
-            const apiKey = document.getElementById('input-apikey').value.trim() || ""; 
-            const asset = document.getElementById('input-asset').value.trim();
-            const threat = document.getElementById('input-threat').value.trim();
-            const vuln = document.getElementById('input-vuln').value.trim();
+            const industry = document.getElementById('input-industry').value;
+            const asset = document.getElementById('input-asset').value;
+            const threat = document.getElementById('input-threat').value;
 
-            if (!asset || !threat || !vuln) {
-                showError("請填寫所有問卷欄位");
+            if (!industry || !asset || !threat) {
+                // 簡易防呆，瀏覽器 native required 應該已攔截
                 return;
             }
 
             // 切換到載入畫面
             switchView('view-loading');
 
-            // 準備 Gemini API Payload
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-            
-            const payload = {
-                systemInstruction: {
-                    parts: [{ 
-                        text: "你是一位精通 ISO 27005 標準的專業企業資安顧問。請根據使用者輸入的「核心資產」、「威脅來源」與「弱點」描述，進行邏輯分析，並產出風險情境。文字請使用專業的台灣繁體中文。請務必嚴格遵循輸出的 JSON 結構。" 
-                    }]
-                },
-                contents: [{
-                    role: "user",
-                    parts: [{ text: `請分析以下情境：\n核心資產或業務: ${asset}\n最擔心的威脅來源: ${threat}\n目前最缺乏的防護或弱點: ${vuln}` }]
-                }],
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            scenarioDescription: { type: "STRING", description: "將資產、威脅與弱點串聯起來的整體風險情境描述，約 50 到 100 字" },
-                            owner: { type: "STRING", description: "從資產推斷出的資產擁有者或負責部門名稱" },
-                            source: { type: "STRING", description: "精煉過後的威脅來源描述" },
-                            vulnerability: { type: "STRING", description: "精煉過後的脆弱點或漏洞描述" },
-                            risk: { type: "STRING", description: "一旦威脅利用弱點成功後，將導致的具體業務風險或營運衝擊" }
-                        },
-                        required: ["scenarioDescription", "owner", "source", "vulnerability", "risk"]
-                    }
-                }
-            };
-
-            // 動態載入文字效果
-            const loadingTexts = ["正在比對 ISO 27005 資安框架資料庫...", "正在解析威脅建模邏輯...", "正在計算業務衝擊與風險矩陣...", "生成最終視覺化報告..."];
+            // 處理載入動畫與文字
+            const loadingTexts = [
+                "正在建立威脅模型...",
+                "正在比對 ISO 27005 資安框架資料庫...", 
+                "正在解析弱點關聯與攻擊路徑...", 
+                "正在計算業務衝擊與風險等級...", 
+                "生成最終視覺化報告..."
+            ];
             let textIdx = 0;
+            const textEl = document.getElementById('loading-text');
+            const progressEl = document.getElementById('progress-bar');
+            
+            textEl.textContent = loadingTexts[0];
+            progressEl.style.width = '10%';
+
             const loadingInterval = setInterval(() => {
-                textIdx = (textIdx + 1) % loadingTexts.length;
-                document.getElementById('loading-text').textContent = loadingTexts[textIdx];
-            }, 2000);
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                clearInterval(loadingInterval);
-
-                if (!response.ok) {
-                    throw new Error(`API 請求失敗 (${response.status})。請確認 API Key 是否正確。`);
+                textIdx++;
+                if (textIdx < loadingTexts.length) {
+                    textEl.textContent = loadingTexts[textIdx];
+                    progressEl.style.width = `${(textIdx + 1) * 20}%`;
                 }
+            }, 600); // 每 0.6 秒換一次文字
 
-                const result = await response.json();
-                
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
-                    
-                    const jsonString = result.candidates[0].content.parts[0].text;
-                    const parsedData = JSON.parse(jsonString);
-                    
-                    // 將資料注入儀表板
-                    renderDashboard(parsedData);
-                    switchView('view-dashboard');
-                } else {
-                    throw new Error("API 回傳格式異常，請稍後再試。");
-                }
+            // 呼叫純前端模擬邏輯
+            const resultData = await simulateAIAnalysis(industry, asset, threat);
 
-            } catch (error) {
-                clearInterval(loadingInterval);
-                console.error(error);
-                showError(error.message);
-            }
+            // 清除動畫計時器
+            clearInterval(loadingInterval);
+
+            // 將資料注入儀表板
+            renderDashboard(resultData);
+            
+            // 延遲一點點再切換視圖，讓使用者看到 100%
+            setTimeout(() => {
+                switchView('view-dashboard');
+                // 重置進度條以供下次使用
+                setTimeout(() => { progressEl.style.width = '0%'; }, 500);
+            }, 300);
         });
 
+        // 將分析結果填入 DOM
         function renderDashboard(data) {
-            // 寫入綜整描述
             document.getElementById('display-desc').textContent = data.scenarioDescription;
             
-            // 寫入卡片
+            // 卡片區
             document.getElementById('card-source').textContent = data.source;
             document.getElementById('card-vuln').textContent = data.vulnerability;
             document.getElementById('card-risk').textContent = data.risk;
             document.getElementById('card-owner').textContent = data.owner;
 
-            // 寫入流程圖節點 (加上 title 支援過長字串)
+            // 關聯圖區
             document.getElementById('graph-source').textContent = data.source;
-            document.getElementById('graph-source').title = data.source;
-            
             document.getElementById('graph-vuln').textContent = data.vulnerability;
-            document.getElementById('graph-vuln').title = data.vulnerability;
-            
             document.getElementById('graph-risk').textContent = data.risk;
-            document.getElementById('graph-risk').title = data.risk;
-            
             document.getElementById('graph-owner').textContent = data.owner;
-            document.getElementById('graph-owner').title = data.owner;
         }
 
+        // 初始化：確保一開始顯示首頁
+        switchView('view-home');
     </script>
 </body>
 </html>
